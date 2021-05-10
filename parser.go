@@ -34,8 +34,7 @@ func parseIntermediateCertificates(reader io.ReadCloser) {
 			continue
 		}
 
-		rand.Seed(time.Now().UnixNano())
-		filename := fmt.Sprintf("%d.pem", rand.Intn(1000000000))
+		filename := fmt.Sprintf("%s.pem", entry[8])
 		err = ioutil.WriteFile(fmt.Sprintf("ca-certs/%s", filename), []byte(strings.Trim(entry[23], "'")), 0777)
 		if err != nil {
 			log.Fatal(err)
@@ -47,6 +46,12 @@ func parseRootCertificates(reader io.ReadCloser) {
 	defer reader.Close()
 
 	csvReader := csv.NewReader(reader)
+
+	// ignore headers
+	_, err := csvReader.Read()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for {
 		entry, err := csvReader.Read()
